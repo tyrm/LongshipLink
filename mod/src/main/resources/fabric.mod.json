@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "longship-link",
+  "version": "${version}",
+  "name": "LongshipLink",
+  "description": "Connecting Minecraft server chat to create communities of servers.",
+  "authors": [
+    "Tyr Mactire"
+  ],
+  "contact": {
+    "repo": "https://tyr.codes/tyr/LongshipLink"
+  },
+  "license": "All-Rights-Reserved",
+  "icon": "assets/longship-link/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "codes.tyr.longshiplink.client.LongshipLinkClient"
+    ],
+    "main": [
+      "codes.tyr.longshiplink.LongshipLink"
+    ]
+  },
+  "mixins": [
+    "longship-link.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
