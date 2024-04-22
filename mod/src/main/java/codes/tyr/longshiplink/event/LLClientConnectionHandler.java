@@ -1,0 +1,15 @@
+package codes.tyr.longshiplink.event;
+
+import codes.tyr.longshiplink.LongshipLink;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+
+public class LLClientConnectionHandler {
+    public static void register() {
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            LongshipLink.LOGGER.info("Client " + client.getSession().getUsername() + " has joined the server");
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            LongshipLink.LOGGER.info("Client " + client.getSession().getUsername() + " has disconnected from the server");
+        });
+    }
+}

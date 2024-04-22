@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Minecraft Client 2" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="corretto-17" />
+    <option name="MAIN_CLASS_NAME" value="net.fabricmc.devlaunchinjector.Main" />
+    <module name="mod.main" />
+    <shortenClasspath name="ARGS_FILE" />
+    <option name="VM_PARAMETERS" value="-Dfabric.dli.config=$ProjectFileDir$/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=client -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotClient" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/run/instance2/" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

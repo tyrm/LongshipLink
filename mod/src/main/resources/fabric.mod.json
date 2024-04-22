@@ -15,7 +15,7 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "codes.tyr.longshiplink.client.LongshipLinkClient"
+      "codes.tyr.longshiplink.LongshipLinkClient"
     ],
     "main": [
       "codes.tyr.longshiplink.LongshipLink"
