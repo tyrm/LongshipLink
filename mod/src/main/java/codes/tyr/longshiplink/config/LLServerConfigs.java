@@ -7,10 +7,10 @@ public class LLServerConfigs {
     public static SimpleConfig CONFIG;
     private static LLServerConfigProvider configs;
 
-    public static String TEST;
-    public static int SOME_INT;
-    public static double SOME_DOUBLE;
-    public static int MAX_DAMAGE_DOWSING_ROD;
+    public static String SUB_KEY;
+    public static String PUB_KEY;
+    public static String SEC_KEY;
+    public static String SERVER_ID;
 
     public static void registerConfigs() {
         configs = new LLServerConfigProvider();
@@ -22,17 +22,17 @@ public class LLServerConfigs {
     }
 
     private static void createConfigs() {
-        configs.addKeyValuePair(new Pair<>("key.test.value1", "Just a Testing string!"), "String");
-        configs.addKeyValuePair(new Pair<>("key.test.value2", 50), "int");
-        configs.addKeyValuePair(new Pair<>("key.test.value3", 4142.5), "double");
-        configs.addKeyValuePair(new Pair<>("dowsing.rod.max.damage", 32), "int");
+        configs.addKeyValuePair(new Pair<>("ll.server_id", "0000000000000000"), "Minecraft Server ID");
+        configs.addKeyValuePair(new Pair<>("pubnub.subkey", "sub-c-00000000-0000-0000-0000-000000000000"), "PubNub Subscribe Key");
+        configs.addKeyValuePair(new Pair<>("pubnub.pubkey", "pub-c-00000000-0000-0000-0000-000000000000"), "PubNub Publish Key");
+        configs.addKeyValuePair(new Pair<>("pubnub.seckey", "sec-c-000000000000000000000000000000000000000000000000"), "PubNub Secret Key");
     }
 
     private static void assignConfigs() {
-        TEST = CONFIG.getOrDefault("key.test.value1", "Nothing");
-        SOME_INT = CONFIG.getOrDefault("key.test.value2", 42);
-        SOME_DOUBLE = CONFIG.getOrDefault("key.test.value3", 42.0d);
-        MAX_DAMAGE_DOWSING_ROD = CONFIG.getOrDefault("dowsing.rod.max.damage", 32);
+        SERVER_ID = CONFIG.getOrDefault("ll.server_id", null);
+        SUB_KEY = CONFIG.getOrDefault("pubnub.subkey", null);
+        PUB_KEY = CONFIG.getOrDefault("pubnub.pubkey", null);
+        SEC_KEY = CONFIG.getOrDefault("pubnub.seckey", null);
 
         LongshipLink.LOGGER.info("All " + configs.getConfigsList().size() + " have been set properly");
     }

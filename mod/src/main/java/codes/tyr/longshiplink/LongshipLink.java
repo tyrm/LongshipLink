@@ -1,7 +1,7 @@
 package codes.tyr.longshiplink;
 
 import codes.tyr.longshiplink.config.LLServerConfigs;
-import codes.tyr.longshiplink.event.LLChatMessageHandler;
+import codes.tyr.longshiplink.event.LLChatMessageServerHandler;
 import codes.tyr.longshiplink.network.LLMessages;
 import net.fabricmc.api.ModInitializer;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +18,6 @@ public class LongshipLink implements ModInitializer {
 
         LLMessages.registerC2SPackets();
 
-        LLChatMessageHandler.register();
+        LLChatMessageServerHandler.register();
     }
 }

@@ -26,6 +26,8 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    implementation group: 'com.pubnub', name: 'pubnub-gson', version: '9.1.1'
 }
 
 processResources {
