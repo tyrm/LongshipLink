@@ -22,6 +22,8 @@ func (a *API) Start() error {
 	e.Use(otelgin.Middleware("LongshipLink"))
 
 	e.GET("/api/v1/auth/user", a.authUserGetHandler)
+	e.GET("/api/v1/servers", a.serversGetHandler)
+	e.POST("/api/v1/servers", a.serversPostHandler)
 
 	a.server = &http.Server{
 		Addr:         "localhost:5420",

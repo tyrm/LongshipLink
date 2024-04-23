@@ -33,11 +33,34 @@ func (l *Logic) DecodeToken(ctx context.Context, token string) (int64, error) {
 	return int64(ints[1]), nil
 }
 
-func (l *Logic) GenerateToken(ctx context.Context, server *models.Server) (string, error) {
+func (l *Logic) GenerateTokens(ctx context.Context, server *models.Server) (string, error) {
 	ctx, span := tracer.Start(ctx, "GenerateToken", tracerAttrs...)
 	defer span.End()
 
 	token, err := l.hashid.Encode([]int{models.KindServer, int(server.ID)})
+	if err != nil {
+		zap.L().Debug("Error encoding token", zap.Error(err))
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (l *Logic) GenerateToken(ctx context.Context, obj any) (string, error) {
+	ctx, span := tracer.Start(ctx, "GenerateToken", tracerAttrs...)
+	defer span.End()
+
+	tokenData := make([]int, 2)
+
+	switch o := obj.(type) {
+	case *models.Server:
+		tokenData[0] = models.KindServer
+		tokenData[1] = int(o.ID)
+	default:
+		return "", errors.New("invalid object type")
+	}
+
+	token, err := l.hashid.Encode(tokenData)
 	if err != nil {
 		zap.L().Debug("Error encoding token", zap.Error(err))
 		return "", err
