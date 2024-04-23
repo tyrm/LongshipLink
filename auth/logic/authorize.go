@@ -6,12 +6,14 @@ import (
 	"net/http"
 )
 
+const tokenTTL = 61
+
 func (l *Logic) GetUserAuthToken(ctx context.Context, serverID, userID string) (string, error) {
 	ctx, span := tracer.Start(ctx, "GetUserAuthToken", tracerAttrs...)
 	defer span.End()
 
 	// create authorization token
-	res, status, err := l.pnGrantTokenReq(ctx, userID, serverID)
+	res, status, err := l.pnGrantTokenReq(ctx, userID, serverID, tokenTTL)
 	if err != nil {
 		span.RecordError(err)
 		return "", err

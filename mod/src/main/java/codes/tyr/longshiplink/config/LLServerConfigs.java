@@ -7,10 +7,9 @@ public class LLServerConfigs {
     public static SimpleConfig CONFIG;
     private static LLServerConfigProvider configs;
 
-    public static String SUB_KEY;
-    public static String PUB_KEY;
-    public static String SEC_KEY;
+    public static String AUTH_URL;
     public static String SERVER_ID;
+    public static String SERVER_SECRET;
 
     public static void registerConfigs() {
         configs = new LLServerConfigProvider();
@@ -22,17 +21,15 @@ public class LLServerConfigs {
     }
 
     private static void createConfigs() {
-        configs.addKeyValuePair(new Pair<>("ll.server_id", "0000000000000000"), "Minecraft Server ID");
-        configs.addKeyValuePair(new Pair<>("pubnub.subkey", "sub-c-00000000-0000-0000-0000-000000000000"), "PubNub Subscribe Key");
-        configs.addKeyValuePair(new Pair<>("pubnub.pubkey", "pub-c-00000000-0000-0000-0000-000000000000"), "PubNub Publish Key");
-        configs.addKeyValuePair(new Pair<>("pubnub.seckey", "sec-c-000000000000000000000000000000000000000000000000"), "PubNub Secret Key");
+        configs.addKeyValuePair(new Pair<>("auth.url", "http://localhost:5420"), "LongshipLink Auth URL");
+        configs.addKeyValuePair(new Pair<>("server.id", "0000000000000000"), "LongshipLink Server ID");
+        configs.addKeyValuePair(new Pair<>("server.secret", "00000000000000000000000000000000"), "LongshipLink Server Secret");
     }
 
     private static void assignConfigs() {
-        SERVER_ID = CONFIG.getOrDefault("ll.server_id", null);
-        SUB_KEY = CONFIG.getOrDefault("pubnub.subkey", null);
-        PUB_KEY = CONFIG.getOrDefault("pubnub.pubkey", null);
-        SEC_KEY = CONFIG.getOrDefault("pubnub.seckey", null);
+        AUTH_URL = CONFIG.getOrDefault("auth.url", null);
+        SERVER_ID = CONFIG.getOrDefault("server.id", null);
+        SERVER_SECRET = CONFIG.getOrDefault("server.secret", null);
 
         LongshipLink.LOGGER.info("All " + configs.getConfigsList().size() + " have been set properly");
     }

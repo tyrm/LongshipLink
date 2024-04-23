@@ -6,27 +6,23 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
-func pnUserUID(userID string) string {
-	return "u:" + userID
-}
-
-func (l *Logic) pnGrantTokenReq(ctx context.Context, userID, serverID string) (*pubnub.PNGrantTokenResponse, pubnub.StatusResponse, error) {
+func (l *Logic) pnGrantTokenReq(ctx context.Context, userID, serverID string, ttl int) (*pubnub.PNGrantTokenResponse, pubnub.StatusResponse, error) {
 	ctx, span := tracer.Start(ctx, "PNGrantToken", tracerAttrs...)
 	span.SetAttributes(semconv.ServiceName("PubNub"))
 	defer span.End()
 
 	return l.pubnub.GrantTokenWithContext(ctx).
-		TTL(15).
-		AuthorizedUUID(pnUserUID(userID)).
+		TTL(ttl).
+		AuthorizedUUID(userID).
 		Channels(map[string]pubnub.ChannelPermissions{
-			"presence.user": {
-				Read: true,
-				Get:  true,
-			},
-			"chats.global": {
+			"global": {
 				Read:  true,
 				Write: true,
 				Get:   true,
+			},
+			"global-pnpres": {
+				Read: true,
+				Get:  true,
 			},
 		}).
 		Meta(map[string]interface{}{

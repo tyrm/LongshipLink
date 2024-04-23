@@ -11,7 +11,8 @@ import (
 const serverTimeout = 120 * time.Second
 
 type API struct {
-	Logic *logic.Logic
+	Logic          *logic.Logic
+	ValidatePlayer bool
 
 	server *http.Server
 }

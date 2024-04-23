@@ -5,11 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 	"net/http"
+	"os"
 	"tyr.codes/tyr/LongshipLink/auth/database"
 )
 
 type authUserGetResponse struct {
-	Token string `json:"token"`
+	SubscriptionKey string `json:"sub_key"`
+	PublishKey      string `json:"pub_key"`
+	Token           string `json:"token"`
 }
 
 func (a *API) authUserGetHandler(c *gin.Context) {
@@ -46,16 +49,19 @@ func (a *API) authUserGetHandler(c *gin.Context) {
 	}
 
 	// check if user exists in playerdb
-	playerExists, err := a.Logic.MinecraftPlayerExists(c.Request.Context(), userID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+	if a.ValidatePlayer {
+		playerExists, err := a.Logic.MinecraftPlayerExists(c.Request.Context(), userID)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		if !playerExists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "player does not exist"})
+			return
+		}
 	}
 
-	if !playerExists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "player does not exist"})
-		return
-	}
 	// create authorization token
 	token, err := a.Logic.GetUserAuthToken(c.Request.Context(), serverID, userID)
 	if err != nil {
@@ -63,5 +69,9 @@ func (a *API) authUserGetHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, authUserGetResponse{Token: token})
+	c.JSON(200, authUserGetResponse{
+		SubscriptionKey: os.Getenv("SUB_KEY"),
+		PublishKey:      os.Getenv("PUB_KEY"),
+		Token:           token,
+	})
 }

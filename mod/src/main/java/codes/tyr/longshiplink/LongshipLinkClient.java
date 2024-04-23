@@ -2,7 +2,6 @@ package codes.tyr.longshiplink;
 
 import codes.tyr.longshiplink.cmd.LLLLCommand;
 import codes.tyr.longshiplink.config.LLClientConfigs;
-import codes.tyr.longshiplink.event.LLChatMessageHandler;
 import codes.tyr.longshiplink.event.LLClientConnectionHandler;
 import codes.tyr.longshiplink.network.LLMessages;
 import codes.tyr.longshiplink.pubnub.ClientConnection;

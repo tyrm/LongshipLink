@@ -48,7 +48,8 @@ func main() {
 
 	// Create API
 	a := api.API{
-		Logic: logic.NewLogic(db),
+		Logic:          logic.NewLogic(db),
+		ValidatePlayer: false,
 	}
 
 	// Start API
