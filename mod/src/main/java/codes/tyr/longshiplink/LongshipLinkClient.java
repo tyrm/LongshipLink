@@ -2,6 +2,7 @@ package codes.tyr.longshiplink;
 
 import codes.tyr.longshiplink.cmd.LLConfigCommand;
 import codes.tyr.longshiplink.cmd.LLLLCommand;
+import codes.tyr.longshiplink.cmd.LLOnlineCommand;
 import codes.tyr.longshiplink.config.LLClientConfigs;
 import codes.tyr.longshiplink.event.LLClientConnectionHandler;
 import codes.tyr.longshiplink.network.LLMessages;
@@ -25,6 +26,7 @@ public class LongshipLinkClient implements ClientModInitializer {
 
         LLLLCommand.register();
         LLConfigCommand.register();
+        LLOnlineCommand.register();
     }
 
     public static String MID() {

@@ -5,6 +5,7 @@ import codes.tyr.longshiplink.LongshipLinkClient;
 import codes.tyr.longshiplink.config.LLClientConfigs;
 import codes.tyr.longshiplink.network.packet.LLAuthRequestPacket;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.pubnub.api.PubNub;
 import com.pubnub.api.PubNubException;
 import com.pubnub.api.UserId;
@@ -13,6 +14,7 @@ import com.pubnub.api.enums.PNStatusCategory;
 import com.pubnub.api.models.consumer.PNStatus;
 import com.pubnub.api.models.consumer.objects_api.uuid.PNGetUUIDMetadataResult;
 import com.pubnub.api.models.consumer.objects_api.uuid.PNSetUUIDMetadataResult;
+import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 import com.pubnub.api.retry.RetryConfiguration;
@@ -237,6 +239,7 @@ public class ClientConnection {
         authLoop.shutdown();
     }
 
+    // User Color
     public Character getUserColor() {
         try {
             PNGetUUIDMetadataResult result = pubnub.getUUIDMetadata().uuid(LongshipLinkClient.MID()).includeCustom(true).sync();
@@ -268,5 +271,32 @@ public class ClientConnection {
         } catch (PubNubException e) {
             LongshipLink.LOGGER.error("User metadata set exception: " + e);
         }
+    }
+
+    // Online Users
+    public List<String> getOnlineUsers() {
+        List<String> users = new ArrayList<>();
+
+        List<String> chans = new ArrayList<>();
+        chans.add(PNChannel.GLOBAL_CHAT);
+        try {
+            PNHereNowResult result = pubnub.hereNow().channels(chans).includeState(true).sync();
+            result.getChannels().get(PNChannel.GLOBAL_CHAT).getOccupants().forEach((occupant) -> {
+                JsonElement state = occupant.getState();
+                if (state == null) {
+                    return;
+                }
+
+                Gson gson = new Gson();
+                UserState userState = gson.fromJson(state, UserState.class);
+                if (userState.getUsername() != null) {
+                    users.add(userState.getUsername());
+                }
+            });
+        } catch (PubNubException e) {
+            throw new RuntimeException(e);
+        }
+
+        return users;
     }
 }
