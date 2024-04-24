@@ -106,6 +106,39 @@ public class ClientConnection {
             @Override
             public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnMessageResult) {
                 LongshipLink.LOGGER.info("PubNub presence " + pnMessageResult.getEvent() + ": " + pnMessageResult.getUuid()+"("+pnMessageResult.getOccupancy()+")");
+                LongshipLink.LOGGER.info(pnMessageResult.getState());
+                try {
+                    Gson gson = new Gson();
+                    UserState userState = gson.fromJson(pnMessageResult.getState(), UserState.class);
+                    String event = pnMessageResult.getEvent();
+                    if (event == null) {
+                        return;
+                    }
+
+                    LongshipLink.LOGGER.info("Event: " + event);
+                    switch (event) {
+                        case "join":
+                            if (!userState.getServerID().equals(LongshipLinkClient.serverID)) {
+                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(GLOBAL_PREFIX + "§8§o" + userState.getUsername() + " joined the chat§r"));
+                            }
+                            break;
+                        case "leave":
+                            if (!userState.getServerID().equals(LongshipLinkClient.serverID)) {
+                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(GLOBAL_PREFIX + "§8§o" + userState.getUsername() + " left the chat§r"));
+                            }
+                            break;
+                        case "timeout":
+                            if (!userState.getServerID().equals(LongshipLinkClient.serverID)) {
+                                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(GLOBAL_PREFIX + "§8§o" + userState.getUsername() + " timed out§r"));
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                catch (Exception e) {
+                    LongshipLink.LOGGER.error("Error parsing message: " + e);
+                }
             }
         });
     }
@@ -139,13 +172,13 @@ public class ClientConnection {
 
         List<String> chans = new ArrayList<>();
         chans.add(PNChannel.GLOBAL_CHAT);
-        pubnub.subscribe().channels(chans).withPresence().execute();
 
         pubnub.setPresenceState().channels(chans).state(new UserState(username, LongshipLinkClient.serverID)).async((result) -> {
             if (!result.isSuccess()) {
                 LongshipLink.LOGGER.error("Presence state error: " + result);
             }
         });
+        pubnub.subscribe().channels(chans).withPresence().execute();
     }
     public void reconnect() {
         if (pubnub == null) {
