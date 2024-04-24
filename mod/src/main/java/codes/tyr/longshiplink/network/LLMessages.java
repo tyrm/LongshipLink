@@ -12,12 +12,12 @@ public class LLMessages {
     public static final Identifier AUTH_RESPONSE_ID = new Identifier(LongshipLink.MOD_ID, "auth-response");
 
     public static void registerC2SPackets() {
-        LongshipLink.LOGGER.info("Registering C2S packets");
+        //LongshipLink.LOGGER.info("Registering C2S packets");
         ServerPlayNetworking.registerGlobalReceiver(LLMessages.AUTH_REQUEST_ID, LLAuthRequestPacket::receive);
     }
 
     public static void registerS2CPackets() {
-        LongshipLink.LOGGER.info("Registering S2C packets");
+        //LongshipLink.LOGGER.info("Registering S2C packets");
         ClientPlayNetworking.registerGlobalReceiver(LLMessages.AUTH_RESPONSE_ID, LLAuthResponsePacket::receive);
     }
 }

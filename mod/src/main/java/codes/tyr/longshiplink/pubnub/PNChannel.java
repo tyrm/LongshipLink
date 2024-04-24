@@ -1,5 +1,6 @@
 package codes.tyr.longshiplink.pubnub;
 
 public class PNChannel {
-    public final static String GLOBAL_CHAT = "global";
+    final public static String GLOBAL_CHAT = "global";
+    final public static String TELL_CHAT = "tell_";
 }

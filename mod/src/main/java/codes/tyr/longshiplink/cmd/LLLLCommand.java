@@ -19,10 +19,10 @@ public class LLLLCommand {
         dispatcher.register(ClientCommandManager.literal("ll")
             .then(ClientCommandManager.argument("text", StringArgumentType.greedyString())
             .executes(context -> {
-                LongshipLink.LOGGER.info("Executing ll command");
+                //LongshipLink.LOGGER.info("Executing ll command");
 
                 String input = StringArgumentType.getString(context, "text");
-                LongshipLink.LOGGER.info("Input: " + input);
+                //LongshipLink.LOGGER.info("Input: " + input);
 
                 LongshipLinkClient.pn.sendChatMessage(input);
 

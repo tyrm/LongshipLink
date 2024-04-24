@@ -24,18 +24,29 @@ func (l *Logic) pnGrantTokenReq(ctx context.Context, userID, serverID string, tt
 				Read: true,
 				Get:  true,
 			},
+			"tell_" + userID: {
+				Read:  true,
+				Write: true,
+			},
+		}).
+		ChannelsPattern(map[string]pubnub.ChannelPermissions{
+			"tell_[0-9a-fA-F-]+": {
+				Write: true,
+			},
 		}).
 		Meta(map[string]interface{}{
 			"sid": serverID,
 		}).
-		UUIDsPattern(map[string]pubnub.UUIDPermissions{
-			".*": {
-				Get: true,
-			},
+		UUIDs(map[string]pubnub.UUIDPermissions{
 			userID: {
 				Get:    true,
 				Delete: true,
 				Update: true,
+			},
+		}).
+		UUIDsPattern(map[string]pubnub.UUIDPermissions{
+			".*": {
+				Get: true,
 			},
 		}).
 		Execute()

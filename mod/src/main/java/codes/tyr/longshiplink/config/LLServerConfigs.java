@@ -6,7 +6,6 @@ import codes.tyr.longshiplink.LongshipLink;
 public class LLServerConfigs {
     public static SimpleConfig CONFIG;
     private static LLServerConfigProvider configs;
-
     public static String AUTH_URL;
     public static String SERVER_ID;
     public static String SERVER_SECRET;

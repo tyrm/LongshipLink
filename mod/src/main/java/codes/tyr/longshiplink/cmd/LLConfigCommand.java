@@ -17,42 +17,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class LLConfigCommand {
-    public static final List<String> COLORS = Arrays.asList(
-        "black",
-        "dark_blue",
-        "dark_green",
-        "dark_aqua",
-        "dark_red",
-        "dark_purple",
-        "gold",
-        "gray",
-        "dark_gray",
-        "blue",
-        "green",
-        "aqua",
-        "red",
-        "light_purple",
-        "yellow",
-        "white"
-    );
-    public static final Map<String, Character> COLOR_CODES = Map.ofEntries(
-        Map.entry("black", '0'),
-        Map.entry("dark_blue", '1'),
-        Map.entry("dark_green", '2'),
-        Map.entry("dark_aqua", '3'),
-        Map.entry("dark_red", '4'),
-        Map.entry("dark_purple", '5'),
-        Map.entry("gold", '6'),
-        Map.entry("gray", '7'),
-        Map.entry("dark_gray", '8'),
-        Map.entry("blue", '9'),
-        Map.entry("green", 'a'),
-        Map.entry("aqua", 'b'),
-        Map.entry("red", 'c'),
-        Map.entry("light_purple", 'd'),
-        Map.entry("yellow", 'e'),
-        Map.entry("white", 'f')
-    );
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             addCommand(dispatcher);
@@ -82,7 +46,7 @@ public class LLConfigCommand {
 
         return switch (configKey) {
             case "color" -> {
-                for (String color : COLORS) {
+                for (String color : LongshipLink.COLORS) {
                     builder.suggest(color);
                 }
                 yield builder.buildFuture();
@@ -108,12 +72,12 @@ public class LLConfigCommand {
 
         return switch (configKey) {
             case "color" -> {
-                if (!COLOR_CODES.containsKey(configValue)) {
+                if (!LongshipLink.COLOR_CODES.containsKey(configValue)) {
                     // TODO Send error to User
                     LongshipLink.LOGGER.error("Invalid color: " + configValue);
                     yield 0;
                 }
-                setColor(COLOR_CODES.get(configValue));
+                setColor(LongshipLink.COLOR_CODES.get(configValue));
                 yield 1;
             }
             default -> 0;
@@ -122,7 +86,7 @@ public class LLConfigCommand {
 
     private static void getColor() {
         Character color = LongshipLinkClient.pn.getUserColor();
-        LongshipLink.LOGGER.info("Current color: " + color);
+        //LongshipLink.LOGGER.info("Current color: " + color);
     }
     private static void setColor(Character color) {
         LongshipLinkClient.pn.setUserColor(color);

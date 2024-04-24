@@ -3,7 +3,6 @@ package codes.tyr.longshiplink.auth;
 import codes.tyr.longshiplink.LongshipLink;
 import codes.tyr.longshiplink.config.LLServerConfigs;
 import com.google.gson.Gson;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,13 +13,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class AuthClient {
-    public static @NotNull UserAuthResponse getClientToken(String uuid) {
+    public static UserAuthResponse getClientToken(String uuid) {
         try {
             // Construct query parameters safely encoding the values
             String queryParams = String.format("sid=%s&secret=%s&uid=%s",
-                    URLEncoder.encode(LLServerConfigs.SERVER_ID, StandardCharsets.UTF_8),
-                    URLEncoder.encode(LLServerConfigs.SERVER_SECRET, StandardCharsets.UTF_8),
-                    URLEncoder.encode(uuid, StandardCharsets.UTF_8));
+                URLEncoder.encode(LLServerConfigs.SERVER_ID, StandardCharsets.UTF_8),
+                URLEncoder.encode(LLServerConfigs.SERVER_SECRET, StandardCharsets.UTF_8),
+                URLEncoder.encode(uuid, StandardCharsets.UTF_8)
+            );
 
             // Combine base URL with query parameters
             URL url = new URL(LLServerConfigs.AUTH_URL + "/api/v1/auth/user?" + queryParams);
@@ -36,7 +36,7 @@ public class AuthClient {
 
             // Check the response code
             int status = connection.getResponseCode();
-            LongshipLink.LOGGER.info("Response Code: " + status);
+            //LongshipLink.LOGGER.info("Response Code: " + status);
 
             // Read the response
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -47,13 +47,12 @@ public class AuthClient {
             }
             reader.close();
 
-            LongshipLink.LOGGER.info("Response: " + response);
+            //LongshipLink.LOGGER.info("Response: " + response);
 
             Gson gson = new Gson();
 
-                // Return the response as a string
+            // Return the response as a string
             return gson.fromJson(response.toString(), UserAuthResponse.class);
-
         } catch (IOException e) {
             e.printStackTrace();
             return null; // or handle more gracefully

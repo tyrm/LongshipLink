@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class LLAuthRequestPacket {
     public static void receive(MinecraftServer server, @NotNull ServerPlayerEntity player, ServerPlayNetworkHandler handler, @NotNull PacketByteBuf buf, PacketSender responseSender) {
-        LongshipLink.LOGGER.info("Received authentication request packet from " + player.getName());
+        //LongshipLink.LOGGER.info("Received authentication request packet from " + player.getName());
 
         boolean renewal = buf.readBoolean();
 
@@ -33,11 +33,11 @@ public class LLAuthRequestPacket {
         LongshipLink.LOGGER.info("ServerID: " + response.getServerID());
         LongshipLink.LOGGER.info("Token: " + response.getToken());
 
-        LLAuthResponsePacket.send(player, response.getSubKey(), response.getPubKey(), response.getToken(), renewal);
+        LLAuthResponsePacket.send(player, mid, response.getSubKey(), response.getPubKey(), response.getToken(), renewal);
     }
 
     public static void send(boolean renewal, String mid) {
-        LongshipLink.LOGGER.info("Sending authentication response packet to server");
+        //LongshipLink.LOGGER.info("Sending authentication response packet to server");
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(renewal);
