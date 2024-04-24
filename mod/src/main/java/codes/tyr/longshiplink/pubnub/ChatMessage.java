@@ -4,11 +4,13 @@ public class ChatMessage {
     private  String sender;
     private  String message;
     private String serverID;
+    private Character userColor;
 
-    public ChatMessage(String sender, String message, String serverID) {
+    public ChatMessage(String sender, String message, String serverID, Character userColor) {
         this.sender = sender;
         this.message = message;
         this.serverID = serverID;
+        this.userColor = userColor;
     }
 
     public String getMessage() {
@@ -28,5 +30,11 @@ public class ChatMessage {
     }
     public void setSender(String sender) {
         this.sender = sender;
+    }
+    public Character getUserColor() {
+        return userColor;
+    }
+    public void setUserColor(Character userColor) {
+        this.userColor = userColor;
     }
 }

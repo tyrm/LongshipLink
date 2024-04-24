@@ -7,7 +7,7 @@ import (
 )
 
 func (l *Logic) pnGrantTokenReq(ctx context.Context, userID, serverID string, ttl int) (*pubnub.PNGrantTokenResponse, pubnub.StatusResponse, error) {
-	ctx, span := tracer.Start(ctx, "PNGrantToken", tracerAttrs...)
+	ctx, span := tracer.Start(ctx, "pnGrantTokenReq", tracerAttrs...)
 	span.SetAttributes(semconv.ServiceName("PubNub"))
 	defer span.End()
 
@@ -27,6 +27,16 @@ func (l *Logic) pnGrantTokenReq(ctx context.Context, userID, serverID string, tt
 		}).
 		Meta(map[string]interface{}{
 			"sid": serverID,
+		}).
+		UUIDsPattern(map[string]pubnub.UUIDPermissions{
+			".*": {
+				Get: true,
+			},
+			userID: {
+				Get:    true,
+				Delete: true,
+				Update: true,
+			},
 		}).
 		Execute()
 }

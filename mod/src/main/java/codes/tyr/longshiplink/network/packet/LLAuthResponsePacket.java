@@ -14,7 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class LLAuthResponsePacket {
-    public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    public static void receive(MinecraftClient client, ClientPlayNetworkHandler handler, @NotNull PacketByteBuf buf, PacketSender responseSender) {
         LongshipLink.LOGGER.info("Received authentication response packet from client");
 
         String mid = buf.readString();
@@ -25,14 +25,7 @@ public class LLAuthResponsePacket {
         boolean renewal = buf.readBoolean();
 
         LongshipLinkClient.serverID = serverID;
-        if (renewal) {
-            LongshipLinkClient.pn.setToken(token);
-            LongshipLinkClient.pn.reconnect();
-        } else {
-            LongshipLinkClient.pn.setKeys(mid, subKey, pubKey, client.getSession().getUsername());
-            LongshipLinkClient.pn.setToken(token);
-            LongshipLinkClient.pn.doSubscribe(client.getSession().getUsername());
-        }
+        LongshipLinkClient.pn.handleNewAuth(mid, subKey, pubKey, token, renewal);
     }
 
     public static void send(@NotNull ServerPlayerEntity player, @NotNull String subKey, @NotNull String pubKey, @NotNull String token, boolean renewal) {

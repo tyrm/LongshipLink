@@ -11,6 +11,8 @@ import com.pubnub.api.UserId;
 import com.pubnub.api.callbacks.SubscribeCallback;
 import com.pubnub.api.enums.PNStatusCategory;
 import com.pubnub.api.models.consumer.PNStatus;
+import com.pubnub.api.models.consumer.objects_api.uuid.PNGetUUIDMetadataResult;
+import com.pubnub.api.models.consumer.objects_api.uuid.PNSetUUIDMetadataResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
 import com.pubnub.api.retry.RetryConfiguration;
@@ -21,7 +23,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -30,8 +34,11 @@ public class ClientConnection {
     private PubNub pubnub;
     private String uid;
     private String username;
+    private Character userColor;
     private final String GLOBAL_PREFIX = "☄";
-    private final ScheduledExecutorService authLoop = Executors.newScheduledThreadPool(1);
+    private final String TELL_PREFIX = "☇";
+    private final Character DEFAULT_COLOR = '7';
+    private ScheduledExecutorService authLoop;
     public ClientConnection() {
         pubnub = null;
     }
@@ -40,10 +47,6 @@ public class ClientConnection {
         pubnub.unsubscribeAll();
     }
     public void setKeys(String uid, String subKey, String pubKey, String username) {
-        LongshipLink.LOGGER.info("Got SubKey: " + subKey);
-        LongshipLink.LOGGER.info("Got PubKey: " + pubKey);
-        LongshipLink.LOGGER.info("Setting PubNub keys for user " + uid);
-
         PNConfiguration pnConfiguration;
 
         // TODO: Remove this when the mcID is properly set
@@ -68,20 +71,12 @@ public class ClientConnection {
         pubnub.addListener(new SubscribeCallback() {
             @Override
             public void status(@NotNull PubNub pubnub, @NotNull PNStatus pnStatus) {
-                LongshipLink.LOGGER.info("PubNub status: UID " + pnStatus.getCategory());
-
                 if (pnStatus.getCategory().equals(PNStatusCategory.PNConnectionError)) {
                     String text = "missing exception";
                     if (pnStatus.getException() != null) {
                         text = pnStatus.getException().toString();
                     }
                     LongshipLink.LOGGER.error("PubNub connection error: " + text);
-                } else if (pnStatus.getCategory().equals(PNStatusCategory.PNConnectedCategory)) {
-                    String text = "missing exception";
-                    if (pnStatus.getException() != null) {
-                        text = pnStatus.getException().toString();
-                    }
-                    LongshipLink.LOGGER.info("PubNub connected: " + text);
                 } else if (pnStatus.getCategory().equals(PNStatusCategory.PNUnexpectedDisconnectCategory)) {
                     String text = "missing exception";
                     if (pnStatus.getException() != null) {
@@ -98,14 +93,10 @@ public class ClientConnection {
             }
             @Override
             public void message(@NotNull PubNub pubnub, @NotNull PNMessageResult o) {
-                LongshipLink.LOGGER.info("PubNub message: " + o.getMessage());
-
                 try {
                     Gson gson = new Gson();
                     ChatMessage chatMessage = gson.fromJson(o.getMessage(), ChatMessage.class);
-
-                    LongshipLink.LOGGER.info("Chat message from "+chatMessage.getServerID()+": " + chatMessage.getSender() + "(" + o.getPublisher() + "): " + chatMessage.getMessage());
-                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(GLOBAL_PREFIX + "§7<" + chatMessage.getSender() + ">§r " + chatMessage.getMessage()));
+                    MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(GLOBAL_PREFIX + "§" + chatMessage.getUserColor() + "<" + chatMessage.getSender() + ">§r " + chatMessage.getMessage()));
                 }
                 catch (Exception e) {
                     LongshipLink.LOGGER.error("Error parsing message: " + e);
@@ -114,9 +105,7 @@ public class ClientConnection {
 
             @Override
             public void presence(@NotNull PubNub pubnub, @NotNull PNPresenceEventResult pnMessageResult) {
-                LongshipLink.LOGGER.info("PubNub presence: " + pnMessageResult);
-                LongshipLink.LOGGER.info("PubNub presence event: " + pnMessageResult.getEvent());
-                LongshipLink.LOGGER.info("PubNub presence UUID: " + pnMessageResult.getUuid());
+                LongshipLink.LOGGER.info("PubNub presence " + pnMessageResult.getEvent() + ": " + pnMessageResult.getUuid()+"("+pnMessageResult.getOccupancy()+")");
             }
         });
     }
@@ -127,9 +116,8 @@ public class ClientConnection {
         }
 
         Channel pubChan = pubnub.channel(PNChannel.GLOBAL_CHAT);
-        pubChan.publish(new ChatMessage(username, message, LongshipLinkClient.serverID)).async((result) -> {
+        pubChan.publish(new ChatMessage(username, message, LongshipLinkClient.serverID, userColor)).async((result) -> {
             if (result.isSuccess()) {
-                LongshipLink.LOGGER.info("Message published: " + result);
                 return;
             }
 
@@ -141,7 +129,6 @@ public class ClientConnection {
         });
     }
     public void setToken(String token) {
-        LongshipLink.LOGGER.info("Setting PubNub token");
         pubnub.setToken(token);
     }
     public void doSubscribe(String username) {
@@ -155,16 +142,39 @@ public class ClientConnection {
         pubnub.subscribe().channels(chans).withPresence().execute();
 
         pubnub.setPresenceState().channels(chans).state(new UserState(username, LongshipLinkClient.serverID)).async((result) -> {
-            if (result.isSuccess()) {
-                LongshipLink.LOGGER.info("Presence state set: " + result);
-            } else {
+            if (!result.isSuccess()) {
                 LongshipLink.LOGGER.error("Presence state error: " + result);
             }
         });
     }
+    public void reconnect() {
+        if (pubnub == null) {
+            LongshipLink.LOGGER.error("PubNub not initialized");
+            return;
+        }
+
+        pubnub.reconnect();
+    }
+
+    public void handleNewAuth(String mid, String subKey, String pubKey, String token, boolean renewal) {
+        if (renewal) {
+            setToken(token);
+            reconnect();
+        } else {
+            String username = MinecraftClient.getInstance().getSession().getUsername();
+
+            setKeys(mid, subKey, pubKey, username);
+            setToken(token);
+            doSubscribe(username);
+
+            userColor = getUserColor();
+        }
+    }
+
+    // Auth Loop
     public Runnable doReauth() {
         return () -> {
-            LongshipLink.LOGGER.info("Reauthenticating with PubNub");
+            LongshipLink.LOGGER.info("Re-authenticating with PubNub");
 
             // TODO: Remove this override. Server knows minecraft uuid.
             String mid = MinecraftClient.getInstance().getSession().getUuidOrNull().toString();
@@ -186,20 +196,44 @@ public class ClientConnection {
         LLAuthRequestPacket.send(false, mid);
 
         // Start reauth loop
+        authLoop = Executors.newScheduledThreadPool(1);
         authLoop.scheduleAtFixedRate(doReauth(), 60, 60, TimeUnit.MINUTES);
     }
-    public void reconnect() {
-        if (pubnub == null) {
-            LongshipLink.LOGGER.error("PubNub not initialized");
-            return;
-        }
-
-        LongshipLink.LOGGER.info("Reconnecting PubNub");
-        pubnub.reconnect();
-    }
-
     public void stopAuthLoop() {
         LongshipLink.LOGGER.info("Stopping PubNub auth loop");
         authLoop.shutdown();
+    }
+
+    public Character getUserColor() {
+        try {
+            PNGetUUIDMetadataResult result = pubnub.getUUIDMetadata().uuid(LongshipLinkClient.MID()).includeCustom(true).sync();
+            Object data = result.getData().getCustom();
+            Map<String, Object> map = (Map<String, Object>) data;
+
+            if (map.containsKey("color")) {
+                return ((String) map.get("color")).charAt(0);
+            }
+        } catch (PubNubException e) {
+            LongshipLink.LOGGER.error("User metadata exception: " + e);
+        } catch (ClassCastException e) {
+            LongshipLink.LOGGER.error("User metadata not a map");
+        }
+
+        return DEFAULT_COLOR;
+    }
+
+    public void setUserColor(Character color) {
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("color", color);
+
+        try {
+            PNSetUUIDMetadataResult result = pubnub.setUUIDMetadata().uuid(LongshipLinkClient.MID()).custom(metadata).sync();
+            userColor = color;
+
+            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("§" + color + "§oColor Updated§r"));
+
+        } catch (PubNubException e) {
+            LongshipLink.LOGGER.error("User metadata set exception: " + e);
+        }
     }
 }

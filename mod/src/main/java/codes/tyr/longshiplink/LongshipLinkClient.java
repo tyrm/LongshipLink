@@ -1,11 +1,13 @@
 package codes.tyr.longshiplink;
 
+import codes.tyr.longshiplink.cmd.LLConfigCommand;
 import codes.tyr.longshiplink.cmd.LLLLCommand;
 import codes.tyr.longshiplink.config.LLClientConfigs;
 import codes.tyr.longshiplink.event.LLClientConnectionHandler;
 import codes.tyr.longshiplink.network.LLMessages;
 import codes.tyr.longshiplink.pubnub.ClientConnection;
 import net.fabricmc.api.ClientModInitializer;
+import net.minecraft.client.MinecraftClient;
 
 public class LongshipLinkClient implements ClientModInitializer {
     public static final ClientConnection pn = new ClientConnection();
@@ -22,5 +24,20 @@ public class LongshipLinkClient implements ClientModInitializer {
         LLClientConnectionHandler.register();
 
         LLLLCommand.register();
+        LLConfigCommand.register();
+    }
+
+    public static String MID() {
+        String mid = MinecraftClient.getInstance().getSession().getUuidOrNull().toString();
+        if (LLClientConfigs.UUID != null && !LLClientConfigs.UUID.equals("00000000-0000-0000-0000-000000000000")) {
+            LongshipLink.LOGGER.info("Using faux UUID: " + LLClientConfigs.UUID);
+            mid = LLClientConfigs.UUID;
+        }
+
+        if (mid == null) {
+            throw new RuntimeException("Cannot get Minecraft ID!");
+        }
+
+        return mid;
     }
 }
