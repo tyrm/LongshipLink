@@ -5,6 +5,8 @@ import (
 	"github.com/uptrace/uptrace-go/uptrace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
+	"strings"
 	"tyr.codes/tyr/LongshipLink/auth/api"
 	"tyr.codes/tyr/LongshipLink/auth/database"
 	"tyr.codes/tyr/LongshipLink/auth/logic"
@@ -46,10 +48,17 @@ func main() {
 		zap.L().Fatal("Error running migration", zap.Error(err))
 	}
 
+	// Configure validate player
+	validatePlayer := true // Set default to true
+	if strings.ToLower(os.Getenv("VALIDATE_PLAYER")) == "false" {
+		zap.L().Warn("Player validation is disabled")
+		validatePlayer = false
+	}
+
 	// Create API
 	a := api.API{
 		Logic:          logic.NewLogic(db),
-		ValidatePlayer: false,
+		ValidatePlayer: validatePlayer,
 	}
 
 	// Start API

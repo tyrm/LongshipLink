@@ -20,12 +20,14 @@ func (a *API) authUserGetHandler(c *gin.Context) {
 	secret := c.Query("secret")
 	userID := c.Query("uid")
 
-	zap.L().Debug("authUserGetHandler", zap.String("server_id", serverID), zap.String("secret", secret), zap.String("user_id", userID))
+	logger := zap.L().With(zap.String("server_id", serverID), zap.String("secret", secret), zap.String("user_id", userID))
+
+	logger.Debug("authUserGetHandler", zap.String("server_id", serverID), zap.String("secret", secret), zap.String("user_id", userID))
 
 	// decode token
 	serverIDInt, err := a.Logic.DecodeToken(c.Request.Context(), serverID)
 	if err != nil {
-		zap.L().Debug("Error decoding token", zap.Error(err))
+		logger.Debug("Error decoding token", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{"error": http.StatusText(http.StatusUnauthorized)}) // return generic error before server auth
 		return
 	}

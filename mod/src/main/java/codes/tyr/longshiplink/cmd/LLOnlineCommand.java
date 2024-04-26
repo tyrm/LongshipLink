@@ -1,6 +1,5 @@
 package codes.tyr.longshiplink.cmd;
 
-import codes.tyr.longshiplink.LongshipLink;
 import codes.tyr.longshiplink.LongshipLinkClient;
 import codes.tyr.longshiplink.pubnub.ClientConnection;
 import com.mojang.brigadier.CommandDispatcher;
@@ -22,12 +21,8 @@ public class LLOnlineCommand {
     private static void addCommand(CommandDispatcher<FabricClientCommandSource> dispatcher) {
         dispatcher.register(ClientCommandManager.literal("llonline")
             .executes(context -> {
-                //LongshipLink.LOGGER.info("Executing llonline command");
-
                 LongshipLinkClient.pn.updateOnlineUsers();
                 List<String> onlineUsers = LongshipLinkClient.pn.getOnlineUsers();
-                //LongshipLink.LOGGER.info("Online users: " + onlineUsers);
-
                 MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of(ClientConnection.GLOBAL_PREFIX + "§7§oPlayers Online:§r " + String.join(", ", onlineUsers)));
 
                 return 1;  // Indicates command executed successfully

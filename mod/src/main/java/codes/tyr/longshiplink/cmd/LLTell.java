@@ -1,6 +1,5 @@
 package codes.tyr.longshiplink.cmd;
 
-import codes.tyr.longshiplink.LongshipLink;
 import codes.tyr.longshiplink.LongshipLinkClient;
 import codes.tyr.longshiplink.pubnub.ClientConnection;
 import com.mojang.brigadier.CommandDispatcher;
@@ -12,7 +11,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class LLTell {
@@ -29,7 +27,6 @@ public class LLTell {
                     .executes(context -> {
                         String username = StringArgumentType.getString(context, "username");
                         String message = StringArgumentType.getString(context, "message");
-                        //LongshipLink.LOGGER.info(">" + username + "> " + message);
 
                         String RecipientUID = LongshipLinkClient.pn.findUID(username);
                         if (RecipientUID == null) {

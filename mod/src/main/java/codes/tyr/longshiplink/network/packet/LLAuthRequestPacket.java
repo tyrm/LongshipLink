@@ -1,8 +1,10 @@
 package codes.tyr.longshiplink.network.packet;
 
 import codes.tyr.longshiplink.LongshipLink;
+import codes.tyr.longshiplink.LongshipLinkClient;
 import codes.tyr.longshiplink.auth.AuthClient;
 import codes.tyr.longshiplink.auth.UserAuthResponse;
+import codes.tyr.longshiplink.config.LLServerConfigs;
 import codes.tyr.longshiplink.network.LLMessages;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
@@ -13,35 +15,38 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+
 public class LLAuthRequestPacket {
     public static void receive(MinecraftServer server, @NotNull ServerPlayerEntity player, ServerPlayNetworkHandler handler, @NotNull PacketByteBuf buf, PacketSender responseSender) {
-        //LongshipLink.LOGGER.info("Received authentication request packet from " + player.getName());
-
         boolean renewal = buf.readBoolean();
+        String reqMID = buf.readString();
+        String mid = player.getUuidAsString();
 
-        // TODO remove override
-        String mid = buf.readString();
-        if (mid == null || mid.isEmpty()) {
-            mid = player.getUuidAsString();
+        if (LLServerConfigs.validateMid() && !reqMID.equals(mid)) {
+            LongshipLink.LOGGER.warn("Invalid MID: " + reqMID + " != " + mid);
+            return;
+        } else {
+            if (reqMID != null && !reqMID.isEmpty()) {
+                LongshipLink.LOGGER.warn("Using faux MID: " + reqMID);
+                mid = reqMID;
+            }
         }
 
-        UserAuthResponse response = AuthClient.getClientToken(mid);
-        LongshipLink.LOGGER.info("Response: " + response);
-        LongshipLink.LOGGER.info("Mid: " + response.getMid());
-        LongshipLink.LOGGER.info("SubKey: " + response.getSubKey());
-        LongshipLink.LOGGER.info("PubKey: " + response.getPubKey());
-        LongshipLink.LOGGER.info("ServerID: " + response.getServerID());
-        LongshipLink.LOGGER.info("Token: " + response.getToken());
-
-        LLAuthResponsePacket.send(player, mid, response.getSubKey(), response.getPubKey(), response.getToken(), renewal);
+        try {
+            UserAuthResponse response = AuthClient.getClientToken(mid);
+            LLAuthResponsePacket.send(player, mid, response.getSubKey(), response.getPubKey(), response.getToken(), renewal);
+        } catch (IOException e) {
+            LongshipLink.LOGGER.error("Error getting client token: " + e.getMessage());
+        }
     }
 
-    public static void send(boolean renewal, String mid) {
-        //LongshipLink.LOGGER.info("Sending authentication response packet to server");
+    public static void send(boolean renewal) {
+        String mid = LongshipLinkClient.MID();
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(renewal);
-        buf.writeString(mid); // TODO remove override
+        buf.writeString(mid);
 
         try {
             ClientPlayNetworking.send(LLMessages.AUTH_REQUEST_ID, buf);

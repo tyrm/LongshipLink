@@ -13,8 +13,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class AuthClient {
-    public static UserAuthResponse getClientToken(String uuid) {
-        try {
+    public static UserAuthResponse getClientToken(String uuid) throws IOException {
             // Construct query parameters safely encoding the values
             String queryParams = String.format("sid=%s&secret=%s&uid=%s",
                 URLEncoder.encode(LLServerConfigs.SERVER_ID, StandardCharsets.UTF_8),
@@ -36,7 +35,7 @@ public class AuthClient {
 
             // Check the response code
             int status = connection.getResponseCode();
-            //LongshipLink.LOGGER.info("Response Code: " + status);
+            LongshipLink.LOGGER.debug("Response Code: " + status);
 
             // Read the response
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -47,15 +46,11 @@ public class AuthClient {
             }
             reader.close();
 
-            //LongshipLink.LOGGER.info("Response: " + response);
+            LongshipLink.LOGGER.debug("Response: " + response);
 
             Gson gson = new Gson();
 
             // Return the response as a string
             return gson.fromJson(response.toString(), UserAuthResponse.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null; // or handle more gracefully
-        }
     }
 }

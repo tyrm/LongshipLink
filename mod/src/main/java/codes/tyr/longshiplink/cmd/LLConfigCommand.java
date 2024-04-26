@@ -10,10 +10,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.Text;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class LLConfigCommand {
@@ -59,7 +58,9 @@ public class LLConfigCommand {
 
         return switch (configKey) {
             case "color" -> {
-                getColor();
+                Character c = getColor();
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("§oUsername color is §" + c + "§o" + LongshipLink.colorName(c) + "§r"));
+
                 yield 1;
             }
             default -> 0;
@@ -78,15 +79,16 @@ public class LLConfigCommand {
                     yield 0;
                 }
                 setColor(LongshipLink.COLOR_CODES.get(configValue));
+                MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("§" + LongshipLink.COLOR_CODES.get(configValue) + "§oColor Updated§r"));
+
                 yield 1;
             }
             default -> 0;
         };
     }
 
-    private static void getColor() {
-        Character color = LongshipLinkClient.pn.getUserColor();
-        //LongshipLink.LOGGER.info("Current color: " + color);
+    private static Character getColor() {
+        return LongshipLinkClient.pn.getUserColor();
     }
     private static void setColor(Character color) {
         LongshipLinkClient.pn.setUserColor(color);

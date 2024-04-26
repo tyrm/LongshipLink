@@ -1,6 +1,5 @@
 package codes.tyr.longshiplink.cmd;
 
-import codes.tyr.longshiplink.LongshipLink;
 import codes.tyr.longshiplink.LongshipLinkClient;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -19,11 +18,7 @@ public class LLLLCommand {
         dispatcher.register(ClientCommandManager.literal("ll")
             .then(ClientCommandManager.argument("text", StringArgumentType.greedyString())
             .executes(context -> {
-                //LongshipLink.LOGGER.info("Executing ll command");
-
                 String input = StringArgumentType.getString(context, "text");
-                //LongshipLink.LOGGER.info("Input: " + input);
-
                 LongshipLinkClient.pn.sendChatMessage(input);
 
                 return 1;  // Indicates command executed successfully

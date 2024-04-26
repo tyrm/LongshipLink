@@ -2,7 +2,6 @@ package codes.tyr.longshiplink.pubnub;
 
 import codes.tyr.longshiplink.LongshipLink;
 import codes.tyr.longshiplink.LongshipLinkClient;
-import codes.tyr.longshiplink.config.LLClientConfigs;
 import codes.tyr.longshiplink.network.packet.LLAuthRequestPacket;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -18,13 +17,12 @@ import com.pubnub.api.models.consumer.presence.PNHereNowOccupantData;
 import com.pubnub.api.models.consumer.presence.PNHereNowResult;
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
 import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
-import  com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
+import com.pubnub.api.models.consumer.presence.PNHereNowChannelData;
 import com.pubnub.api.retry.RetryConfiguration;
 import com.pubnub.api.v2.PNConfiguration;
 import com.pubnub.api.v2.entities.Channel;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -35,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class ClientConnection {
     private PubNub pubnub;
@@ -44,7 +41,6 @@ public class ClientConnection {
     private Character userColor;
     private Map<String, UserState> onlineUsers = new ConcurrentHashMap<>();
     public static final String GLOBAL_PREFIX = "☄";
-    public static final String TELL_PREFIX = "☇";
     public static final String GUILD_PREFIX = "🛡";
     public static final Character DEFAULT_COLOR = '7';
     private ScheduledExecutorService authLoop;
@@ -61,12 +57,6 @@ public class ClientConnection {
         this.uid = uid;
         this.username = username;
         this.tellChan = PNChannel.TELL_CHAT + this.uid;
-
-        // TODO: Remove this when the mcID is properly set
-        if (LLClientConfigs.UUID != null && !LLClientConfigs.UUID.equals("00000000-0000-0000-0000-000000000000")) {
-            LongshipLink.LOGGER.warn("Using faux UUID: " + LLClientConfigs.UUID);
-            this.uid = LLClientConfigs.UUID;
-        }
 
         try {
             final UserId userId = new UserId(this.uid);
@@ -222,25 +212,11 @@ public class ClientConnection {
     public Runnable doReauth() {
         return () -> {
             //LongshipLink.LOGGER.info("Re-authenticating with PubNub");
-
-            // TODO: Remove this override. Server knows minecraft uuid.
-            String mid = MinecraftClient.getInstance().getSession().getUuidOrNull().toString();
-            if (LLClientConfigs.UUID != null && !LLClientConfigs.UUID.equals("00000000-0000-0000-0000-000000000000")) {
-                LongshipLink.LOGGER.warn("Using faux UUID: " + LLClientConfigs.UUID);
-                mid = LLClientConfigs.UUID;
-            }
-            LLAuthRequestPacket.send(true, mid);
+            LLAuthRequestPacket.send(true);
         };
     }
     public void startAuthLoop() {
-        // TODO: Remove this override. Server knows minecraft uuid.
-        String mid = MinecraftClient.getInstance().getSession().getUuidOrNull().toString();
-        if (LLClientConfigs.UUID != null && !LLClientConfigs.UUID.equals("00000000-0000-0000-0000-000000000000")) {
-            LongshipLink.LOGGER.warn("Using faux UUID: " + LLClientConfigs.UUID);
-            mid = LLClientConfigs.UUID;
-        }
-
-        LLAuthRequestPacket.send(false, mid);
+        LLAuthRequestPacket.send(false);
 
         // Start reauth loop
         authLoop = Executors.newScheduledThreadPool(1);
@@ -279,9 +255,6 @@ public class ClientConnection {
         try {
             PNSetUUIDMetadataResult result = pubnub.setUUIDMetadata().uuid(LongshipLinkClient.MID()).custom(metadata).sync();
             userColor = color;
-
-            MinecraftClient.getInstance().inGameHud.getChatHud().addMessage(Text.of("§" + color + "§oColor Updated§r"));
-
         } catch (PubNubException e) {
             LongshipLink.LOGGER.error("User metadata set exception: " + e);
         }
@@ -293,20 +266,20 @@ public class ClientConnection {
     }
     public List<String> getOnlineUsers(String username) {
         return onlineUsers.values().
-                stream().
-                map(UserState::getUsername).
-                filter(userStateUsername -> !userStateUsername.equals(username)).
-                toList();
+            stream().
+            map(UserState::getUsername).
+            filter(userStateUsername -> !userStateUsername.equals(username)).
+            toList();
     }
     public void updateOnlineUsers() {
         List<String> channels = new ArrayList<>();
         channels.add(PNChannel.GLOBAL_CHAT);
         try {
             PNHereNowResult result = pubnub.hereNow()
-                    .channels(channels)
-                    .includeState(true)
-                    .includeUUIDs(true)
-                    .sync();
+                .channels(channels)
+                .includeState(true)
+                .includeUUIDs(true)
+                .sync();
 
             if (result.getTotalOccupancy() > 0) {
                 Map<String, UserState> newUserMap = new HashMap<>();

@@ -1,6 +1,9 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Minecraft Client 1" type="Application" factoryName="Application">
     <option name="ALTERNATIVE_JRE_PATH" value="corretto-17" />
+    <envs>
+      <env name="FAUX_MID" value="21ae52dd-dda3-41f5-b969-13f903a6c935" />
+    </envs>
     <option name="MAIN_CLASS_NAME" value="net.fabricmc.devlaunchinjector.Main" />
     <module name="mod.main" />
     <shortenClasspath name="ARGS_FILE" />
