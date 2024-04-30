@@ -36,8 +36,21 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
     // read server secret by sidW
     let sid = sid.unwrap();
     let secret_key = format!("server.{}.secret", sid);
-    let kv_secret = kv.get(&secret_key).text().await;
-    console_debug!("kv_key: {}, kv_secret: {}", secret_key, kv_secret?.ok_or("secret not found").unwrap());
+    let kv_secret_result = kv.get(&secret_key).text().await;
+
+    let kv_secret = match kv_secret_result {
+        Ok(Some(secret)) => secret,
+        Ok(None) => {
+            console_debug!("Secret not found in KV: {}", secret_key);
+            return Response::error("Unauthorized", 401);
+        },
+        Err(error) => {
+            console_error!("Error reading secret from KV: {:?}", error);
+            return Response::error("Internal Server Error", 500);
+        }
+    };
+
+    console_debug!("kv_key: {}, kv_secret: {}", secret_key, kv_secret);
 
     // Create a JSON object
     let params = json!({
