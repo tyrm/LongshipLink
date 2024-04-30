@@ -33,11 +33,12 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
         return Response::error("Missing required parameters", 400);
     }
 
-    // read server secret by sidW
+    let secret_string = secret.unwrap();
+
+    // read server secret by sid
     let sid = sid.unwrap();
     let secret_key = format!("server.{}.secret", sid);
     let kv_secret_result = kv.get(&secret_key).text().await;
-
     let kv_secret = match kv_secret_result {
         Ok(Some(secret)) => secret,
         Ok(None) => {
@@ -49,13 +50,18 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
             return Response::error("Internal Server Error", 500);
         }
     };
-
     console_debug!("kv_key: {}, kv_secret: {}", secret_key, kv_secret);
+
+    // Compare the secret from the request with the secret from KV
+    if secret_string != kv_secret {
+        console_debug!("Secret mismatch: {} != {}", secret_string, kv_secret);
+        return Response::error("Unauthorized", 401);
+    };
 
     // Create a JSON object
     let params = json!({
         "sid": sid,
-        "secret": secret,
+        "secret": secret_string,
         "uid": uid,
     });
     Response::ok(params.to_string())
