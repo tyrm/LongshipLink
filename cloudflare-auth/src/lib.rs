@@ -69,11 +69,36 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
         return Response::error("Unauthorized", 401);
     };
 
+    // Validate the player using PlayerDB
+    if !validate_player(uid.to_string()).await? {
+        return Response::error("Invalid player id", 400);
+    }
+
     // Create a JSON object
     let params = json!({
         "sid": sid,
         "secret": secret,
-        "uid": uid,
+        "uid": uid.to_string(),
     });
     Response::ok(params.to_string())
+}
+
+async fn validate_player(uid: String) -> Result<bool> {
+    let url = format!("https://playerdb.co/api/player/minecraft/{}", uid);
+    let http_response = match reqwest::get(url).await {
+        Ok(response) => response,
+        Err(error) => {
+            error.to_string();
+            console_error!("Error fetching data: {:?}", error);
+            return Err(Error::from(error.to_string()));
+        }
+    };
+
+    let status = http_response.status();
+    console_debug!("Status: {}", status);
+    if status != 200 {
+        return Ok(false);
+    }
+
+    return Ok(true);
 }
