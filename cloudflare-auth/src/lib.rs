@@ -1,19 +1,17 @@
 use worker::*;
 use url::Url;
 use serde_json::json;
-use wasm_bindgen::prelude::*;
-use js_sys::Promise;
 
 #[event(fetch)]
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let router = Router::new();
     router
-        .get("/api/v1/auth/user", authenticate_user)
+        .get_async("/api/v1/auth/user", authenticate_user)
         .run(req, env)
         .await
 }
 
-fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Response> {
+async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Response> {
     let url = Url::parse(&req.url().unwrap().to_string())?;
     let kv = ctx.env.kv("ll-dev")?;
 
@@ -35,19 +33,17 @@ fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Response> {
         return Response::error("Missing required parameters", 400);
     }
 
-    // read server secret by sid
+    // read server secret by sidW
     let sid = sid.unwrap();
     let secret_key = format!("server.{}.secret", sid);
-    console_debug!("secret_key: {}", secret_key);
-    let kv_secret = kv.get(&secret_key).text();
-    console_debug!("kv_secret: {:?}", kv_secret);
+    let kv_secret = kv.get(&secret_key).text().await;
+    console_debug!("kv_key: {}, kv_secret: {}", secret_key, kv_secret?.ok_or("secret not found").unwrap());
 
     // Create a JSON object
     let params = json!({
         "sid": sid,
         "secret": secret,
         "uid": uid,
-        //"kv_secret": kv_secret.unwrap(),
     });
     Response::ok(params.to_string())
 }
