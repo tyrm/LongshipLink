@@ -1,8 +1,8 @@
-use worker::*;
 use pubnub::*;
 use pubnub::access::permissions;
-use serde_json::json;
 use serde::Deserialize;
+use serde_json::json;
+use worker::*;
 
 #[event(fetch)]
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
@@ -80,7 +80,7 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
         Ok(None) => {
             console_debug!("Secret not found in KV: {}", secret_key);
             return Response::error("Unauthorized", 401);
-        },
+        }
         Err(error) => {
             console_error!("Error reading secret from KV: {:?}", error);
             return Response::error("Internal Server Error", 500);
