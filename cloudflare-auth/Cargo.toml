@@ -18,7 +18,7 @@ worker-kv = "0.7"
 wasm-bindgen = "0.2.86"
 reqwest = { version = "0.12"}
 serde = { version = "1.0.199", features = ["derive"] }
-pubnub = { version = "0.6.0", default-features = false, features = ["serde", "reqwest","crypto", "access", "presence", "blocking"] }
+pubnub = { version = "0.6.0", default-features = false, features = ["presence", "access", "serde", "reqwest", "crypto", "parse_token", "blocking"] }
 
 [profile.release]
 opt-level = "s" # optimize for size in release builds
@@ -39,7 +39,7 @@ features = [
 [dev-dependencies]
 fs_extra = "1.2.0"
 psutil = { git = "https://github.com/mygnu/rust-psutil", branch = "update-dependencies" }
-reqwest = { version = "0.11.8", features = ["json"] }
+reqwest = { version = "0.12", features = ["json"] }
 tokio = { version = "1.5.0", features = [
     "rt",
     "macros",
