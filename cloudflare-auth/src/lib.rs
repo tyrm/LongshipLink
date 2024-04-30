@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use worker::*;
 use pubnub::*;
 use pubnub::access::permissions;
@@ -148,7 +147,7 @@ async fn get_pn_token(uid: String, pub_key: String, sub_key: String, sec_key: St
         .with_user_id("auth-server")
         .build();
 
-    let mut client = match client {
+    let client = match client {
         Ok(client) => client,
         Err(error) => {
             console_error!("Error creating PubNub client: {:?}", error);
