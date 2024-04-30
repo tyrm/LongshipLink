@@ -7,6 +7,11 @@ binding = "ll-dev"
 id = "..."
 preview_id = "..."
 
+[vars]
+PUBNUB_PUBLISH_KEY = "pub-c-..."
+PUBNUB_SECRET_KEY = "sec-c-..."
+PUBNUB_SUBSCRIBE_KEY = "sub-c-..."
+
 [build]
 command = "cargo install -q worker-build && worker-build --release"
 
