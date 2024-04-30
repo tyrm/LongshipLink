@@ -134,7 +134,7 @@ async fn validate_player(uid: String) -> Result<bool> {
         return Ok(false);
     }
 
-    return Ok(true);
+    Ok(true)
 }
 
 async fn get_pn_token(uid: String, pub_key: String, sub_key: String, sec_key: String) -> Result<String> {
