@@ -30,14 +30,24 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
 
     // Return 400 error if any of the required parameters are missing
     if sid.is_none() || secret.is_none() || uid.is_none() {
-        return Response::error("Missing required parameters", 400);
+        return Response::error("Missing required parameter", 400);
     }
 
-    let secret_string = secret.unwrap();
+    let sid_string = match sid {
+        Some(sid) => sid,
+        None => {
+            return Response::error("Missing required parameter", 400);
+        }
+    };
+    let secret_string = match secret {
+        Some(secret) => secret,
+        None => {
+            return Response::error("Missing required parameter", 400);
+        }
+    };
 
     // read server secret by sid
-    let sid = sid.unwrap();
-    let secret_key = format!("server.{}.secret", sid);
+    let secret_key = format!("server.{}.secret", sid_string);
     let kv_secret_result = kv.get(&secret_key).text().await;
     let kv_secret = match kv_secret_result {
         Ok(Some(secret)) => secret,
@@ -60,7 +70,7 @@ async fn authenticate_user(req: Request, ctx: RouteContext<()>) -> Result<Respon
 
     // Create a JSON object
     let params = json!({
-        "sid": sid,
+        "sid": sid_string,
         "secret": secret_string,
         "uid": uid,
     });
